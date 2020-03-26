@@ -5,7 +5,7 @@ global col, size, pos
 
 col = 6
 size = 36
-pos = 27
+pos = 10
 
 class PIECE(enum.IntEnum):
     BLACK = 0
@@ -65,8 +65,16 @@ class board:
         self.state = state[:] if state is not None else [-1] * 36
 
         ### to be deleted
-        self.state[27] = PIECE.BLACK.value
-        # self.state[11] = PIECE.WHITE.value
+        for i in range(36):
+            self.state[i] = PIECE.SPACE.value
+        self.state[10] = PIECE.BLACK.value
+        self.state[1] = PIECE.WHITE.value
+        # self.state[29] = PIECE.WHITE.value
+        self.state[4] = PIECE.WHITE.value
+        self.state[24] = PIECE.WHITE.value
+        self.state[15] = PIECE.WHITE.value
+        self.state[16] = PIECE.BLACK.value
+        self.state[17] = PIECE.WHITE.value
 
 
 
@@ -143,29 +151,29 @@ class board:
             # step_count >= 24 
             if( step_count >= 25 or (self.state[position] == piece and temp_pos != -1) ):
                 # print('step_count : ',self.state[position], piece.value )
-                return EXEC_STATE.FAIL
+                return EXEC_STATE.FAIL, -1
 
             if( self.state[position] !=  (piece) and self.state[position] != PIECE.SPACE and self.state[position] != PIECE.UNKNOW):
 
                 if(pass_ring):
-                    return EXEC_STATE.SUCCESS
+                    return EXEC_STATE.SUCCESS, position
 
                 else:
                     step_count = 0 # may be removed
-                    return EXEC_STATE.FAIL
+                    return EXEC_STATE.FAIL, -1
         try:
             new_pos = direction_map[position][0]
             new_dir = direction_map[position][1]
             # print('try pos: ', new_pos)
             if( self.state[new_pos] !=  (piece) and self.state[new_pos] != PIECE.SPACE and self.state[new_pos] != PIECE.UNKNOW):
-                return EXEC_STATE.SUCCESS
+                return EXEC_STATE.SUCCESS, new_pos
             else:
                 return self.eat(piece, new_pos, new_dir, step_count, True)
 
         except KeyError:
             # print('error')
             step_count = 0
-            return EXEC_STATE.FAIL 
+            return EXEC_STATE.FAIL, -1
 
     # eatable record the starting position to eat other piece
     def check_eat(self, position, piece):
@@ -179,9 +187,10 @@ class board:
         self.state[position] = PIECE.SPACE
 
         for direction in DIRECTION:
-            if( self.eat(piece, position, direction, step_count, False ) != EXEC_STATE.FAIL):
-                eatable.append(position)
-                print('check_eat pos: ', position, ' step_count: ', step_count, 'dir: ', direction)
+            state, new_pos = self.eat(piece, position, direction, step_count, False )
+            if( state != EXEC_STATE.FAIL):
+                eatable.append(new_pos)
+                print('check_eat pos: ', new_pos, ' step_count: ', step_count, 'dir: ', direction)
                 step_count = 0
 
         self.state[position] = piece
@@ -209,11 +218,12 @@ class board:
         for dir_pos in dirs:
             if( dir_pos == 0 ):
                 continue
-            if( self.state[position + dir_pos] != PIECE.SPACE):
+            if( self.state[position + dir_pos] == PIECE.SPACE):
                 moveable.append( position + dir_pos )
 
         return moveable
 
+    # def find_next_move(self, )
 
 
 test = board()
@@ -223,10 +233,10 @@ print('test.test.take_turn() : ', test.take_turn())
 
 # pos = test.move_single_step( pos,DIRECTION.RIGHT)
 # print(pos)
-print(test.eat(PIECE.BLACK, pos, DIRECTION.RIGHT, 0, False))
+# print(test.eat(PIECE.BLACK, pos, DIRECTION.RIGHT, 0, False))
 # pos = test.move_single_step( pos,DIRECTION.UP)
 # search_move(pos, DIRECTION.RIGHT, 0, False)
 
-# print(test.check_eat(pos, test.state[pos]))
+print(test.check_eat(pos, test.state[pos]))
 print(test.check_move(pos,  test.state[pos]))
 
