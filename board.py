@@ -5,7 +5,7 @@ global col, size, pos
 
 col = 6
 size = 36
-pos = 11
+pos = 27
 
 class PIECE(enum.IntEnum):
     BLACK = 0
@@ -52,6 +52,9 @@ direction_map = {
     29 :  [34, DIRECTION.UP   ], 23 : [33, DIRECTION.UP   ], 17 : [3, DIRECTION.DOWN ], 11 : [ 4, DIRECTION.DOWN ]
 }
 
+corner_pos = [0, 5, 30, 35]
+
+
 class board:
     # state equals every point on the board
     # step == 0 means white's turn to play, otherwise
@@ -62,8 +65,11 @@ class board:
         self.state = state[:] if state is not None else [-1] * 36
 
         ### to be deleted
-        self.state[11] = PIECE.BLACK.value
-        self.state[6] = PIECE.WHITE.value
+        self.state[27] = PIECE.BLACK.value
+        # self.state[11] = PIECE.WHITE.value
+
+
+
         # for i in range(col):
         #     for j in range(col):
         #         if ( i <= 1):
@@ -102,7 +108,6 @@ class board:
         
     def move_single_step(self, position, direction):
         # global pos
-        # return (position%5) ? 1 : 0
         if( direction == DIRECTION.LEFT ):
             return -1 if  position % 6 == 0 else (position - 1)
 
@@ -133,11 +138,11 @@ class board:
             step_count += 1
             temp_pos = self.move_single_step(position, direction)
             position = temp_pos if temp_pos != -1 else position 
-            print('while pos: ', position, temp_pos)
+            # print('while pos: ', position, temp_pos)
 
             # step_count >= 24 
             if( step_count >= 25 or (self.state[position] == piece and temp_pos != -1) ):
-                print('step_count : ',self.state[position], piece.value )
+                # print('step_count : ',self.state[position], piece.value )
                 return EXEC_STATE.FAIL
 
             if( self.state[position] !=  (piece) and self.state[position] != PIECE.SPACE and self.state[position] != PIECE.UNKNOW):
@@ -151,16 +156,63 @@ class board:
         try:
             new_pos = direction_map[position][0]
             new_dir = direction_map[position][1]
-            print('try pos: ', new_pos)
+            # print('try pos: ', new_pos)
             if( self.state[new_pos] !=  (piece) and self.state[new_pos] != PIECE.SPACE and self.state[new_pos] != PIECE.UNKNOW):
                 return EXEC_STATE.SUCCESS
             else:
                 return self.eat(piece, new_pos, new_dir, step_count, True)
 
         except KeyError:
-            print('error')
+            # print('error')
             step_count = 0
             return EXEC_STATE.FAIL 
+
+    # eatable record the starting position to eat other piece
+    def check_eat(self, position, piece):
+        temp_pos = position
+        step_count = 0
+        eatable = []
+        for p in corner_pos:
+            if p == position: 
+                return []
+
+        self.state[position] = PIECE.SPACE
+
+        for direction in DIRECTION:
+            if( self.eat(piece, position, direction, step_count, False ) != EXEC_STATE.FAIL):
+                eatable.append(position)
+                print('check_eat pos: ', position, ' step_count: ', step_count, 'dir: ', direction)
+                step_count = 0
+
+        self.state[position] = piece
+
+        return eatable
+
+    # movable record where the piece can go
+    def check_move(self, position, piece):
+        dirs = [-7, -6, -5, -1, 1, 5, 6, 7]
+        no_move = 0
+        moveable = []
+
+        if( position % 6 == 0):
+            dirs[0] = dirs[3] = dirs[5] = no_move
+
+        if( position >= 0 and position <= 5):
+            dirs[0] = dirs[1] = dirs[2] = no_move
+
+        if( (position + 1) % 6 == 0):
+            dirs[2] = dirs[4] = dirs[7] = no_move
+
+        if (position >= 30 and position <= 35):
+            dirs[5] = dirs[6] = dirs[7] = no_move
+
+        for dir_pos in dirs:
+            if( dir_pos == 0 ):
+                continue
+            if( self.state[position + dir_pos] != PIECE.SPACE):
+                moveable.append( position + dir_pos )
+
+        return moveable
 
 
 
@@ -171,10 +223,10 @@ print('test.test.take_turn() : ', test.take_turn())
 
 # pos = test.move_single_step( pos,DIRECTION.RIGHT)
 # print(pos)
-print(test.eat(PIECE.BLACK, pos, DIRECTION.LEFT, 0, False))
+print(test.eat(PIECE.BLACK, pos, DIRECTION.RIGHT, 0, False))
 # pos = test.move_single_step( pos,DIRECTION.UP)
-
 # search_move(pos, DIRECTION.RIGHT, 0, False)
 
-
+# print(test.check_eat(pos, test.state[pos]))
+print(test.check_move(pos,  test.state[pos]))
 
