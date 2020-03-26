@@ -28,9 +28,9 @@ class DIRECTION(enum.IntEnum):
     UP = -2
     DOWN = 2
 
-class action(enum.IntEnum):
-    move = 0
-    eat = 1
+class ACTION(enum.IntEnum):
+    MOVE = 0
+    EAT = 1
 
 class pair:
 
@@ -65,16 +65,16 @@ class board:
         self.state = state[:] if state is not None else [-1] * 36
 
         ### to be deleted
-        for i in range(36):
+        for i in range(size):
             self.state[i] = PIECE.SPACE.value
-        self.state[10] = PIECE.BLACK.value
-        self.state[1] = PIECE.WHITE.value
+        # self.state[10] = PIECE.BLACK.value
+        # self.state[1] = PIECE.WHITE.value
         # self.state[29] = PIECE.WHITE.value
-        self.state[4] = PIECE.WHITE.value
-        self.state[24] = PIECE.WHITE.value
-        self.state[15] = PIECE.WHITE.value
+        # self.state[4] = PIECE.WHITE.value
+        # self.state[24] = PIECE.WHITE.value
+        # self.state[15] = PIECE.WHITE.value
         self.state[16] = PIECE.BLACK.value
-        self.state[17] = PIECE.WHITE.value
+        # self.state[17] = PIECE.WHITE.value
 
 
 
@@ -223,7 +223,37 @@ class board:
 
         return moveable
 
-    # def find_next_move(self, )
+    def find_next_move(self, piece):
+        next_move = []
+        for position in range(size):
+            if(self.state[position] == piece):
+                eat_list = self.check_eat(position, piece)
+                move_list = self.check_move(position, piece)
+                for new_pos in eat_list:
+                    next_move.append( pair(position,new_pos ) )
+                for new_pos in move_list:
+                    next_move.append( pair(position,new_pos ) )
+        return next_move
+
+        #     if( len(move) != 0 ): 
+        #         for new_pos in move:
+        #             next_move.append( pair(position,new_pos) )
+        # return next_move
+    def check_remaining_piece(self, piece):
+        for position in range(size):
+            if( self.state[position] == piece ):
+                return EXEC_STATE.SUCCESS
+        return EXEC_STATE.FAIL 
+
+    def move(prev_pos, next_pos, piece):
+        global step 
+
+        if( next_pos > size or next_pos < 0):
+            return EXEC_STATE.FAIL
+        self.state[next_pos] = piece
+        self.state[prev_pos] = PIECE.SPACE
+        step += 1
+        return EXEC_STATE.SUCCESS
 
 
 test = board()
@@ -240,3 +270,7 @@ print('test.test.take_turn() : ', test.take_turn())
 print(test.check_eat(pos, test.state[pos]))
 print(test.check_move(pos,  test.state[pos]))
 
+# temp = test.find_next_move(PIECE.BLACK)
+# for i in range(len(temp)):
+#     print('first: ', temp[i].prev, 'second: ', temp[i].next)
+print(test.check_remaining_piece(PIECE.WHITE))
