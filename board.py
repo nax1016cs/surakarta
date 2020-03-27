@@ -1,11 +1,12 @@
 import enum
 
 
-global col, size, pos 
+global col, size, pos , step
 
 col = 6
 size = 36
-pos = 10
+pos = 0
+step = 0
 
 class PIECE(enum.IntEnum):
     BLACK = 0
@@ -54,6 +55,26 @@ direction_map = {
 
 corner_pos = [0, 5, 30, 35]
 
+def print_left_board(idx):
+    return {
+        0: "0 ┃ ┃",
+        1: "1 ┃ ┗",
+        2: "2 ┗━━",
+        3: "3 ┏━━",
+        4: "4 ┃ ┏",
+        5: "5 ┃ ┃"
+    }[idx]
+
+def print_right_board(idx):
+    return {
+        0: " ┃ ┃",
+        1: " ┛ ┃",
+        2: " ━━┛",
+        3: " ━━┓",
+        4: " ┓ ┃",
+        5: " ┃ ┃"
+    }[idx]
+
 
 class board:
     # state equals every point on the board
@@ -64,19 +85,13 @@ class board:
         self.step = step
         self.state = state[:] if state is not None else [-1] * 36
 
-        ### to be deleted
-        for i in range(size):
-            self.state[i] = PIECE.SPACE.value
-        # self.state[10] = PIECE.BLACK.value
-        # self.state[1] = PIECE.WHITE.value
-        # self.state[29] = PIECE.WHITE.value
-        # self.state[4] = PIECE.WHITE.value
-        # self.state[24] = PIECE.WHITE.value
-        # self.state[15] = PIECE.WHITE.value
-        self.state[16] = PIECE.BLACK.value
-        # self.state[17] = PIECE.WHITE.value
-
-
+        # do not remove
+        for i in range(36):
+            self.state[i] = PIECE.SPACE
+        self.state[31] = PIECE.WHITE
+        self.state[26] = PIECE.WHITE
+        for i in range(0,12):
+            self.state[i] = PIECE.BLACK
 
         # for i in range(col):
         #     for j in range(col):
@@ -102,6 +117,7 @@ class board:
         return WIN_STATE.BLACK_WIN if w > b else WIN_STATE.WHITE_WIN
 
     def take_turn(self):
+        global step
         return PIECE.WHITE if self.step % 2 else PIECE.BLACK
 
     def count_piece(self):
@@ -137,7 +153,8 @@ class board:
     #         DIRECTION.DOWN:      position + col
     #     }[direction]
 
-    # find piece to eat, this piece is going to eat another piece
+    # find piece to eat
+    # position == new_pos
     def eat(self, piece, position, direction, step_count, pass_ring):
         temp_pos = position
 
@@ -162,13 +179,21 @@ class board:
                     step_count = 0 # may be removed
                     return EXEC_STATE.FAIL, -1
         try:
+
             new_pos = direction_map[position][0]
             new_dir = direction_map[position][1]
             # print('try pos: ', new_pos)
+            if( self.state[new_pos] ==  (piece) ):
+                # print(position, self.state[position])
+                return EXEC_STATE.FAIL, -1
+
             if( self.state[new_pos] !=  (piece) and self.state[new_pos] != PIECE.SPACE and self.state[new_pos] != PIECE.UNKNOW):
                 return EXEC_STATE.SUCCESS, new_pos
             else:
+                # if( self.state[new_pos] !=  (piece) ):
                 return self.eat(piece, new_pos, new_dir, step_count, True)
+                # else:
+                    
 
         except KeyError:
             # print('error')
@@ -190,7 +215,7 @@ class board:
             state, new_pos = self.eat(piece, position, direction, step_count, False )
             if( state != EXEC_STATE.FAIL):
                 eatable.append(new_pos)
-                print('check_eat pos: ', new_pos, ' step_count: ', step_count, 'dir: ', direction)
+                # print('check_eat pos: ', new_pos, ' step_count: ', step_count, 'dir: ', direction)
                 step_count = 0
 
         self.state[position] = piece
@@ -198,7 +223,7 @@ class board:
         return eatable
 
     # movable record where the piece can go
-    def check_move(self, position, piece):
+    def check_move(self, position):
         dirs = [-7, -6, -5, -1, 1, 5, 6, 7]
         no_move = 0
         moveable = []
@@ -220,7 +245,7 @@ class board:
                 continue
             if( self.state[position + dir_pos] == PIECE.SPACE):
                 moveable.append( position + dir_pos )
-
+        # print(moveable)
         return moveable
 
     def find_next_move(self, piece):
@@ -228,38 +253,59 @@ class board:
         for position in range(size):
             if(self.state[position] == piece):
                 eat_list = self.check_eat(position, piece)
-                move_list = self.check_move(position, piece)
+                move_list = self.check_move(position)
                 for new_pos in eat_list:
                     next_move.append( pair(position,new_pos ) )
                 for new_pos in move_list:
                     next_move.append( pair(position,new_pos ) )
         return next_move
 
-        #     if( len(move) != 0 ): 
-        #         for new_pos in move:
-        #             next_move.append( pair(position,new_pos) )
-        # return next_move
     def check_remaining_piece(self, piece):
         for position in range(size):
             if( self.state[position] == piece ):
                 return EXEC_STATE.SUCCESS
         return EXEC_STATE.FAIL 
 
-    def move(prev_pos, next_pos, piece):
+    def move(self, prev_pos, next_pos):
         global step 
 
-        if( next_pos > size or next_pos < 0):
+        # outside the board
+        if( next_pos > size or next_pos < 0 ):
             return EXEC_STATE.FAIL
-        self.state[next_pos] = piece
+
+        self.state[next_pos] = self.state[prev_pos]
         self.state[prev_pos] = PIECE.SPACE
         step += 1
         return EXEC_STATE.SUCCESS
 
+    def print_board(self):
+        idx = 0
+        print( "+--------------------+" )
+        print( "      0 1 2 3 4 5    " )
+        print( "  ┏━━━━━━━┓ ┏━━━━━━━┓" )
+        print( "  ┃ ┏━━━┓ ┃ ┃ ┏━━━┓ ┃" )
+
+        for i in range(col):
+            print(print_left_board(idx), end = '')
+            for j in range(col):
+                if( self.state[i*col+j] == PIECE.SPACE ):
+                    print(' x', end = '')
+                else:
+                    print(' {}'.format(self.state[i*col+j]), end = '')
+            print(print_right_board(idx), end = '')
+            print('')
+            idx += 1
+
+        print( "  ┃ ┗━━━┛ ┃ ┃ ┗━━━┛ ┃" )
+        print( "  ┗━━━━━━━┛ ┗━━━━━━━┛" )
+        print( "+--------------------+" )
 
 test = board()
-print('test.state : ', test.state)
-print('test.test.compare_PIECE() : ', test.compare_piece())
-print('test.test.take_turn() : ', test.take_turn())
+# print(test.find_next_move(test.state[pos]).prev, test.find_next_move(test.state[pos]).next)
+# print('test.state : ', test.state)
+# print(test.check_move(pos))
+# print('test.test.compare_PIECE() : ', test.compare_piece())
+# print('test.test.take_turn() : ', test.take_turn())
 
 # pos = test.move_single_step( pos,DIRECTION.RIGHT)
 # print(pos)
@@ -267,10 +313,22 @@ print('test.test.take_turn() : ', test.take_turn())
 # pos = test.move_single_step( pos,DIRECTION.UP)
 # search_move(pos, DIRECTION.RIGHT, 0, False)
 
-print(test.check_eat(pos, test.state[pos]))
-print(test.check_move(pos,  test.state[pos]))
-
-# temp = test.find_next_move(PIECE.BLACK)
+# print(test.check_eat(pos, test.state[pos]))
+# print(test.check_move(pos,  test.state[pos]))
+temp = test.find_next_move(PIECE.WHITE)
+tstepp=0
+while len(temp) > 0 and tstepp<20:
+    tstepp+=1
+    temp = test.find_next_move(PIECE.WHITE)
+    # print('temp_len', len(temp))
+    test.move(temp[0].prev, temp[0].next)
+    print('from', temp[0].prev,'to', temp[0].next)
+test.print_board()
 # for i in range(len(temp)):
 #     print('first: ', temp[i].prev, 'second: ', temp[i].next)
-print(test.check_remaining_piece(PIECE.WHITE))
+# print(temp[0].prev, temp[0].next)
+# print(len(temp[0].prev), len(temp[0].next))
+# print(temp[0].prev + temp[0].next)
+
+# print(test.check_remaining_piece(PIECE.WHITE))
+# test.print_board()
