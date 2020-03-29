@@ -248,6 +248,8 @@ class board:
         # print(moveable)
         return moveable
 
+
+    # not eat first greedy, little node moves is prior to bigger node eat
     def find_next_move(self, piece):
         next_move = []
         for position in range(size):
