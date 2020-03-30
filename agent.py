@@ -2,6 +2,7 @@ from board import board
 from board import PIECE
 from board import pair
 from board import EXEC_STATE
+from board import ACTION
 
 
 
@@ -24,10 +25,11 @@ class agent:
         return
 
     def take_action(self, board, piece):
-        move_list = board.find_next_move(piece)
-        if( len(move_list) ):
-            mv_state = board.move(move_list[0].prev,move_list[0].next )
-            return move_list[0] if mv_state != EXEC_STATE.FAIL else pair()
+        next_moves = board.find_next_moves(piece, ACTION.EAT) + board.find_next_moves(piece, ACTION.MOVE)
+        # print(next_moves[0][0].prev)
+        if( len(next_moves) ):
+            mv_state = board.move(next_moves[0].prev,next_moves[0].next )
+            return next_moves[0] if mv_state != EXEC_STATE.FAIL else pair()
         return pair()
 
     def get_name(self):

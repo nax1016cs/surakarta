@@ -85,22 +85,16 @@ class board:
         self.step = step
         self.state = state[:] if state is not None else [-1] * 36
 
-        # do not remove
-        for i in range(36):
-            self.state[i] = PIECE.SPACE
-        self.state[31] = PIECE.WHITE
-        self.state[26] = PIECE.WHITE
-        for i in range(0,12):
-            self.state[i] = PIECE.BLACK
 
-        # for i in range(col):
-        #     for j in range(col):
-        #         if ( i <= 1):
-        #             self.state [i*col+j] = PIECE.BLACK.value
-        #         if ( i <= 3 and i > 1): 
-        #             self.state [i*col+j] = PIECE.SPACE.value
-        #         elif ( i <= 5 and i > 3):
-        #             self.state [i*col+j] = PIECE.WHITE.value
+
+        for i in range(col):
+            for j in range(col):
+                if ( i <= 1):
+                    self.state [i*col+j] = PIECE.BLACK.value
+                if ( i <= 3 and i > 1): 
+                    self.state [i*col+j] = PIECE.SPACE.value
+                elif ( i <= 5 and i > 3):
+                    self.state [i*col+j] = PIECE.WHITE.value
         return
 
     def __getitem__(self, pos):
@@ -250,17 +244,30 @@ class board:
 
 
     # not eat first greedy, little node moves is prior to bigger node eat
-    def find_next_move(self, piece):
-        next_move = []
+    def find_next_moves(self, piece, action):
+        next_move_list = []
+
         for position in range(size):
             if(self.state[position] == piece):
-                eat_list = self.check_eat(position, piece)
-                move_list = self.check_move(position)
-                for new_pos in eat_list:
-                    next_move.append( pair(position,new_pos ) )
-                for new_pos in move_list:
-                    next_move.append( pair(position,new_pos ) )
-        return next_move
+                temp_moves = []
+                if(action == ACTION.EAT):
+                    temp_moves = self.check_eat(position, piece)
+                    
+
+                else:
+                    temp_moves = self.check_move(position)
+                    # next_move_list.append ()
+
+                for new_pos in temp_moves:
+                    next_move_list.append( pair(position,new_pos ) )
+                # eat_list = self.check_eat(position, piece)
+                # move_list = self.check_move(position)
+
+                # for new_pos in eat_list:
+                #     next_move_list.append( pair(position,new_pos ) )
+                # for new_pos in move_list:
+                #     next_move_list.append( pair(position,new_pos ) )
+        return next_move_list
 
     def check_remaining_piece(self, piece):
         for position in range(size):
@@ -291,7 +298,7 @@ class board:
             print(print_left_board(idx), end = '')
             for j in range(col):
                 if( self.state[i*col+j] == PIECE.SPACE ):
-                    print(' x', end = '')
+                    print(' -', end = '')
                 else:
                     print(' {}'.format(self.state[i*col+j]), end = '')
             print(print_right_board(idx), end = '')

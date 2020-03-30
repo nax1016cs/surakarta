@@ -55,6 +55,7 @@ class statistic:
 
         env_win = total - player_win
 
+        print()
         print( "In " , self.count , " games:\n")
         print( "player win: " , player_win , " games")
         print( "env win: " , env_win , " games\n")
