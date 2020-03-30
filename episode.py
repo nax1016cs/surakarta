@@ -97,11 +97,14 @@ class episode:
 	def get_winner(self, player, envir):
 		return envir if ( take_turns(player, envir) == player ) else player
 
-
-ep = episode()
-ep.clear()
-ep.open_episode()
-player = agent(PIECE.BLACK)
-ep.close_episode(player, ep.ep_state)
-print(ep.ep_time)
-print(ep.ep_close)
+if __name__ == '__main__':
+	ep = episode()
+	ep.clear()
+	ep.open_episode()
+	player = agent(PIECE.BLACK)
+	ep.close_episode(player, ep.ep_state)
+	print(ep.ep_time)
+	print(ep.ep_close)
+	a = 0
+	a += 1 if(1==0) else 0
+	print(a)

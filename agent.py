@@ -43,6 +43,6 @@ class agent:
 			if( board.state[i] == (self.get_piece() ^ 1) ):
 				count += 1 
 		return count
-
-test = agent(PIECE.BLACK)
-test.print_pos(pair(6, 8))
+if __name__ == '__main__':
+	test = agent(PIECE.BLACK)
+	test.print_pos(pair(6, 8))

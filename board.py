@@ -301,36 +301,36 @@ class board:
         print( "  ┃ ┗━━━┛ ┃ ┃ ┗━━━┛ ┃" )
         print( "  ┗━━━━━━━┛ ┗━━━━━━━┛" )
         print( "+--------------------+" )
+if __name__ == '__main__':
+    test = board()
+    # print(test.find_next_move(test.state[pos]).prev, test.find_next_move(test.state[pos]).next)
+    # print('test.state : ', test.state)
+    # print(test.check_move(pos))
+    # print('test.test.compare_PIECE() : ', test.compare_piece())
+    # print('test.test.take_turn() : ', test.take_turn())
 
-test = board()
-# print(test.find_next_move(test.state[pos]).prev, test.find_next_move(test.state[pos]).next)
-# print('test.state : ', test.state)
-# print(test.check_move(pos))
-# print('test.test.compare_PIECE() : ', test.compare_piece())
-# print('test.test.take_turn() : ', test.take_turn())
+    # pos = test.move_single_step( pos,DIRECTION.RIGHT)
+    # print(pos)
+    # print(test.eat(PIECE.BLACK, pos, DIRECTION.RIGHT, 0, False))
+    # pos = test.move_single_step( pos,DIRECTION.UP)
+    # search_move(pos, DIRECTION.RIGHT, 0, False)
 
-# pos = test.move_single_step( pos,DIRECTION.RIGHT)
-# print(pos)
-# print(test.eat(PIECE.BLACK, pos, DIRECTION.RIGHT, 0, False))
-# pos = test.move_single_step( pos,DIRECTION.UP)
-# search_move(pos, DIRECTION.RIGHT, 0, False)
-
-# print(test.check_eat(pos, test.state[pos]))
-# print(test.check_move(pos,  test.state[pos]))
-temp = test.find_next_move(PIECE.WHITE)
-tstepp=0
-while len(temp) > 0 and tstepp<20:
-    tstepp+=1
+    # print(test.check_eat(pos, test.state[pos]))
+    # print(test.check_move(pos,  test.state[pos]))
     temp = test.find_next_move(PIECE.WHITE)
-    # print('temp_len', len(temp))
-    test.move(temp[0].prev, temp[0].next)
-    print('from', temp[0].prev,'to', temp[0].next)
-test.print_board()
-# for i in range(len(temp)):
-#     print('first: ', temp[i].prev, 'second: ', temp[i].next)
-# print(temp[0].prev, temp[0].next)
-# print(len(temp[0].prev), len(temp[0].next))
-# print(temp[0].prev + temp[0].next)
+    tstepp=0
+    while len(temp) > 0 and tstepp<20:
+        tstepp+=1
+        temp = test.find_next_move(PIECE.WHITE)
+        # print('temp_len', len(temp))
+        test.move(temp[0].prev, temp[0].next)
+        print('from', temp[0].prev,'to', temp[0].next)
+    test.print_board()
+    # for i in range(len(temp)):
+    #     print('first: ', temp[i].prev, 'second: ', temp[i].next)
+    # print(temp[0].prev, temp[0].next)
+    # print(len(temp[0].prev), len(temp[0].next))
+    # print(temp[0].prev + temp[0].next)
 
-# print(test.check_remaining_piece(PIECE.WHITE))
-# test.print_board()
+    # print(test.check_remaining_piece(PIECE.WHITE))
+    # test.print_board()
